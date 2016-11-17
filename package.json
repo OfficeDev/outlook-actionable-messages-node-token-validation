@@ -1,0 +1,12 @@
+{
+    "name": "outlook_actionable_messages_node_token_validation", 
+    "version": "1.0.0", 
+    "private": true, 
+    "dependencies": {
+      "express": "3.x",
+      "jsonwebtoken": "7.x",
+      "request": "2.x",
+      "rsa-pem-from-mod-exp": "^0.8.4",
+      "base64url": "^1.0.6"
+    }
+}
