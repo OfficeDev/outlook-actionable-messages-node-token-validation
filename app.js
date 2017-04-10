@@ -46,34 +46,39 @@ app.post('/api/expense', function (req, res) {
     if (token) {
         var validator = new validation.ActionableMessageTokenValidator();
         
-        // Replace [WEB SERVICE URL] with your service domain URL.
-        // For example, if the service URL is https://api.contoso.com/finance/expense?id=1234,
-        // then replace [WEB SERVICE URL] with https://api.contoso.com
-        var result = validator.validateToken(
+        // Replace https://api.contoso.com with your service domain URL.
+        // For example, if the service URL is https://api.xuz.com/finance/expense?id=1234,
+        // then replace https://api.contoso.com with https://api.xyz.com
+        validator.validateToken(
             token, 
-            "[WEB SERVICE URL]",
+            "https://api.contoso.com",
             function (err, result) {
                 if (err) {
-                    console.error(err);
+                    console.error('error: ' + err.message);
                     res.status(401);
                     res.end();
-                    return;
                 } else {
                     // We have a valid token. We will verify the sender and the action performer. 
+                    // You should replace the code below with your own validation logic.
                     // In this example, we verify that the email is sent by Contoso LOB system
                     // and the action performer has to be someone with @contoso.com email.
+                    //
+                    // You should also return the CARD-ACTION-STATUS header in the response.
+                    // The value of the header will be displayed to the user.
                     
                     if (result.sender.toLowerCase() != 'lob@contoso.com' ||
                         !result.action_performer.toLowerCase().endsWith('@contoso.com')) {
-                        console.error('Invalid sender or the action performer is not allowed');
-                        res.status(500);
+                        res.set('CARD-ACTION-STATUS', 'Invalid sender or the action performer is not allowed')
+                        res.status(403);
                         res.end();
                         return;
                     }
+
+                    // Further business logic code here to process the expense report.
                     
+                    res.set('CARD-ACTION-STATUS', 'The expense was approved.')
                     res.status(200);
                     res.end();
-                    return;
                 }
             });
     } else {

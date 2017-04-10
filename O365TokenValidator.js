@@ -26,10 +26,6 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/**
- * Module for token validation.
- */
-
 "use strict";
 
 var request = require('request');
@@ -38,60 +34,36 @@ var base64url = require('base64url');
 var oid = require('./OpenIdMetadata');
 var jwt = require('jsonwebtoken');
 
-const O365_APP_ID = "48af08dc-f6d2-435f-b2a7-069abd99c086";
-const O365_OPENID_METADATA_URL = "https://substrate.office.com/sts/common/.well-known/openid-configuration";
-const O365_TOKEN_ISSUER = "https://substrate.office.com/sts/";
-
-/**
- * Result from token validation.
- */
-var ActionableMessageTokenValidationResult = (function() {
-    function ActionableMessageTokenValidationResult() {
+var O365TokenValidationResult = (function() {
+    function O365TokenValidationResult() {
         this.sender = "";
         this.actionPerformer = "";
     }
     
-    return ActionableMessageTokenValidationResult;
+    return O365TokenValidationResult;
 }());
 
-/**
- * Token validator for actionable message.
- */
-var ActionableMessageTokenValidator = (function () {
-    /**
-     * Constructor.
-     */
-    function ActionableMessageTokenValidator() {
+var O365TokenValidator = (function () {
+    function O365TokenValidator() {
     };
     
-    /**
-     * Validates an actionable message token.
-     * @param token
-     *   A JWT issued by Microsoft.
-     *
-     * @param targetUrl
-     *   The expected URL in the token. This should the web service URL.
-     *
-     * @param cb
-     *   The callback when the validation is completed.
-     */
-    ActionableMessageTokenValidator.prototype.validateToken = function (token, targetUrl, cb) {
+    O365TokenValidator.prototype.validateToken = function (token, audience, cb) {
         var decoded = jwt.decode(token, { complete: true });
         var verifyOptions = {
-            issuer: O365_TOKEN_ISSUER,
-            audience: targetUrl
+            issuer: "https://substrate.office.com/sts/",
+            audience: audience
         };
         
-        var openIdMetadata = new oid.OpenIdMetadata(O365_OPENID_METADATA_URL)
+        var openIdMetadata = new oid.OpenIdMetadata("https://substrate.office.com/sts/common/.well-known/openid-configuration")
         
         openIdMetadata.getKey(decoded.header.kid, key => {
-            var result = new ActionableMessageTokenValidationResult();
+            var result = new O365TokenValidationResult();
             
             if (key) {
                 try {
                     jwt.verify(token, key, verifyOptions);
                     
-                    if (decoded.payload.appid != O365_APP_ID) {
+                    if (decoded.payload.appid != "48af08dc-f6d2-435f-b2a7-069abd99c086") {
                         var error = new Error("Invalid app id");
                         Error.captureStackTrace(error);
                         cb(error);
@@ -113,8 +85,8 @@ var ActionableMessageTokenValidator = (function () {
         });
     };
     
-    return ActionableMessageTokenValidator;
+    return O365TokenValidator;
 }());
 
-exports.ActionableMessageTokenValidationResult = ActionableMessageTokenValidationResult;
-exports.ActionableMessageTokenValidator = ActionableMessageTokenValidator;
+exports.O365TokenValidationResult = O365TokenValidationResult;
+exports.O365TokenValidator = O365TokenValidator;
