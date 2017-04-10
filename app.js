@@ -29,9 +29,8 @@
 'use strict';
 
 var express = require('express');
-var jwt = require('jsonwebtoken');
 var request = require('request');
-var oid = require('./OpenIdMetadata');
+var o365 = require('./O365TokenValidator');
 var app = express();
 
 app.post('/api/expense', function (req, res) {
@@ -45,55 +44,39 @@ app.post('/api/expense', function (req, res) {
     }
     
     if (token) {
-        var decoded = jwt.decode(token, { complete: true });
-        var verifyOptions = {
-            issuer: "https://substrate.office.com/sts/",
-            
-            // Replace [WEB SERVICE URL] with your service domain URL.
-            // For example, if the service URL is https://api.contoso.com/finance/expense?id=1234,
-            // then replace [WEB SERVICE URL] with https://api.contoso.com
-            audience: "[WEB SERVICE URL]"
-        };
+        var validator = new o365.O365TokenValidator();
         
-        var openIdMetadata = new oid.OpenIdMetadata("https://substrate.office.com/sts/common/.well-known/openid-configuration")
-        
-        openIdMetadata.getKey(decoded.header.kid, key => {
-            if (key) {
-                try {
-                    jwt.verify(token, key, verifyOptions);
-                    
-                    if (decoded.payload.appid != "48af08dc-f6d2-435f-b2a7-069abd99c086") {
-                        console.error("Invalid app id");
-                        res.status(401);
-                        res.end();
-                        return;
-                    }
-                    
-                    // sender claim will contain the email address of the sender.
-                    // Validate that the email is sent by your organization.
-                    var sender = decoded.payload.sender;
-                    
-                    // subject claim will contain the email of the person who performed the action.
-                    // Validate that the person has the priviledge to perform this action.
-                    var subject = decoded.payload.sub;
-                } catch (err) {
+        // Replace [WEB SERVICE URL] with your service domain URL.
+        // For example, if the service URL is https://api.contoso.com/finance/expense?id=1234,
+        // then replace [WEB SERVICE URL] with https://api.contoso.com
+        var result = validator.validateToken(
+            token, 
+            "[WEB SERVICE URL]",
+            function (err, result) {
+                if (err) {
                     console.error(err);
                     res.status(401);
                     res.end();
                     return;
+                } else {
+                    // We have a valid token. We will verify the sender and the action performer. 
+                    // In this example, we verify that the email is sent by Contoso LOB system
+                    // and the action performer has to be someone with @contoso.com email.
+                    
+                    if (result.sender.toLowerCase() != 'lob@contoso.com' ||
+                        !result.action_performer.toLowerCase().endsWith('@contoso.com')) {
+                        console.error('Invalid sender or the action performer is not allowed');
+                        res.status(500);
+                        res.end();
+                        return;
+                    }
+                    
+                    res.status(200);
+                    res.end();
+                    return;
                 }
-                
-                res.status(200);
-                res.end();
-                return;
-            } else {
-                res.status(401);
-                res.end();
-                return;
-            }
-        });
-    }
-    else {
+            });
+    } else {
         res.status(401);
         res.end();
     }
