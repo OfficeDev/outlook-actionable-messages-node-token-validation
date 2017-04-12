@@ -47,7 +47,7 @@ app.post('/api/expense', function (req, res) {
         var validator = new validation.ActionableMessageTokenValidator();
         
         // Replace https://api.contoso.com with your service domain URL.
-        // For example, if the service URL is https://api.xuz.com/finance/expense?id=1234,
+        // For example, if the service URL is https://api.xyz.com/finance/expense?id=1234,
         // then replace https://api.contoso.com with https://api.xyz.com
         validator.validateToken(
             token, 
@@ -68,7 +68,7 @@ app.post('/api/expense', function (req, res) {
                     
                     if (result.sender.toLowerCase() != 'lob@contoso.com' ||
                         !result.action_performer.toLowerCase().endsWith('@contoso.com')) {
-                        res.set('CARD-ACTION-STATUS', 'Invalid sender or the action performer is not allowed')
+                        res.set('CARD-ACTION-STATUS', 'Invalid sender or the action performer is not allowed.')
                         res.status(403);
                         res.end();
                         return;
