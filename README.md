@@ -68,4 +68,4 @@ The code sample is using the following library for JWT validation.
 More information Outlook Actionable Messages is available [here](https://dev.outlook.com/actions).
 
 ## Copyright
-Copyright (c) 2016 Microsoft. All rights reserved.
+Copyright (c) 2017 Microsoft. All rights reserved.
