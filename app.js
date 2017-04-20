@@ -45,6 +45,11 @@ app.post('/api/expense', function (req, res) {
     if (token) {
         var validator = new validation.ActionableMessageTokenValidator();
         
+        // validateToken will verify the following
+        // 1. The token is issued by Microsoft and its digital signature is valid.
+        // 2. The token has not expired.
+        // 3. The audience claim matches the service domain URL.
+        //
         // Replace https://api.contoso.com with your service domain URL.
         // For example, if the service URL is https://api.xyz.com/finance/expense?id=1234,
         // then replace https://api.contoso.com with https://api.xyz.com
@@ -59,14 +64,13 @@ app.post('/api/expense', function (req, res) {
                 } else {
                     // We have a valid token. We will verify the sender and the action performer. 
                     // You should replace the code below with your own validation logic.
-                    // In this example, we verify that the email is sent by Contoso LOB system 
-                    // with email address lob@contoso.com and the action performer is someone 
-                    // with a @contoso.com email address.
+                    // In this example, we verify that the email is sent by expense@contoso.com
+                    // and the action performer is someone with a @contoso.com email address.
                     //
                     // You should also return the CARD-ACTION-STATUS header in the response.
                     // The value of the header will be displayed to the user.
                     
-                    if (result.sender.toLowerCase() != 'lob@contoso.com' ||
+                    if (result.sender.toLowerCase() != 'expense@contoso.com' ||
                         !result.action_performer.toLowerCase().endsWith('@contoso.com')) {
                         res.set('CARD-ACTION-STATUS', 'Invalid sender or the action performer is not allowed.')
                         res.status(403);
