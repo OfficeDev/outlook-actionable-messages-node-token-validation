@@ -32,16 +32,18 @@ Services can send actionable messages to users to complete simple tasks against 
                             res.status(401);
                             res.end();
                         } else {
-                            // We have a valid token. We will verify the sender and the action performer. 
+                            // We have a valid token. We will verify the sender and the action performer claims in the JWT token. 
+                            // The action performer is the user who took the action (i.e. “sub” claim of JWT token)
+                            //
                             // You should replace the code below with your own validation logic.
-                            // In this example, we verify that the email is sent by expense@contoso.com
-                            // and the action performer is someone with a @contoso.com email address.
+                            // In this example, we verify that the email is sent by expense@contoso.com (expected sender)
+                            // and the email of the person who performed the action is john@contoso.com email (expected user)
                             //
                             // You should also return the CARD-ACTION-STATUS header in the response.
                             // The value of the header will be displayed to the user.
                             
                             if (result.sender.toLowerCase() != 'expense@contoso.com' ||
-                                !result.action_performer.toLowerCase().endsWith('@contoso.com')) {
+                                result.action_performer.toLowerCase() != 'john@contoso.com') {
                                 res.set('CARD-ACTION-STATUS', 'Invalid sender or the action performer is not allowed.')
                                 res.status(403);
                                 res.end();
