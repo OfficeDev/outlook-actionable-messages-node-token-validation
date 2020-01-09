@@ -71,7 +71,7 @@ app.post('/api/expense', function (req, res) {
                     // The value of the header will be displayed to the user.
                     
                     if (result.sender.toLowerCase() != 'expense@contoso.com' ||
-                        !result.action_performer.toLowerCase().endsWith('@contoso.com')) {
+                        !result.actionPerformer.toLowerCase().endsWith('@contoso.com')) {
                         res.set('CARD-ACTION-STATUS', 'Invalid sender or the action performer is not allowed.')
                         res.status(403);
                         res.end();
